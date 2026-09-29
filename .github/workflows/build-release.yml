@@ -1,0 +1,21 @@
+name: Build release ZIP
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Moodle installable ZIP
+        run: |
+          mkdir -p dist/sectionbulk
+          rsync -a ./ dist/sectionbulk/ --exclude '.git/' --exclude '.github/' --exclude 'dist/' --exclude '.gitignore'
+          cd dist
+          zip -r local_sectionbulk.zip sectionbulk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: local_sectionbulk
+          path: dist/local_sectionbulk.zip
+          retention-days: 30
