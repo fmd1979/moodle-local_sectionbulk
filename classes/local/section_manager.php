@@ -96,7 +96,7 @@ class section_manager {
                 continue;
             }
 
-            if (count($sections) > 1 && empty($data->allmatches)) {
+            if ($data->sectionmode === 'name' && count($sections) > 1 && empty($data->allmatches)) {
                 $rows[] = $this->row($course, null, 'skipped',
                     get_string('detail_duplicate', 'local_sectionbulk', count($sections)), false);
                 continue;
@@ -159,11 +159,35 @@ class section_manager {
     }
 
     private function find_sections(int $courseid, \stdClass $data): array {
+        if ($data->sectionmode === 'all') {
+            return $this->db->get_records_select(
+                'course_sections',
+                'course = :courseid AND section > 0',
+                ['courseid' => $courseid],
+                'section ASC'
+            );
+        }
+
         if ($data->sectionmode === 'number') {
             return $this->db->get_records('course_sections', [
                 'course' => $courseid,
                 'section' => (int)$data->sectionnumber,
             ], 'section ASC');
+        }
+
+        if ($data->sectionmode === 'numbers') {
+            $numbers = $this->parse_section_numbers((string)($data->sectionnumbers ?? ''));
+            if (!$numbers) {
+                return [];
+            }
+            [$insql, $params] = $this->db->get_in_or_equal($numbers, SQL_PARAMS_NAMED, 'section');
+            $params['courseid'] = $courseid;
+            return $this->db->get_records_select(
+                'course_sections',
+                "course = :courseid AND section {$insql}",
+                $params,
+                'section ASC'
+            );
         }
 
         $name = trim((string)$data->sectionname);
