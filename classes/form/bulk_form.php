@@ -239,6 +239,8 @@ class bulk_form extends \moodleform {
             'quiz_grademethod_set', 'quiz_highest_multiattempt',
         ]));
 
+        // Keep the global Preview action outside the last collapsible fieldset.
+        $mform->closeHeaderBefore('preview');
         $mform->addElement('submit', 'preview', get_string('preview', 'local_sectionbulk'), ['class' => 'btn-primary']);
     }
 
