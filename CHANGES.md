@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2 - 2026-09-30
+- Moved the global Preview button outside the Quiz target collapsible section.
+- Preview now renders as a general form action for both section and quiz operations.
+
 ## 1.2.1 - 2026-09-30
 - Added section target mode for all regular sections in each selected course.
 - Added multiple section numbers and ranges, e.g. `1,2,4-7`.
