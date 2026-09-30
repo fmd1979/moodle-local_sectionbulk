@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.1 - 2026-09-30
+- Added section target mode for all regular sections in each selected course.
+- Added multiple section numbers and ranges, e.g. `1,2,4-7`.
+- Preserved exact-name targeting and single-section targeting.
+- Preview lists each affected section separately before applying.
+
 ## 1.2.0 - 2026-09-29
 - Prepared public GitHub/Marketplace structure.
 - Added Moodle Plugin CI matrix for Moodle 4.3, 4.5, 5.0, 5.1 and 5.2.
