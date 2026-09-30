@@ -22,7 +22,7 @@ Every write operation requires a preview first.
 
 ## Section operations
 
-A section can be selected by section number or exact section name.
+A section target can be selected as: all regular sections in each course, one section number, multiple section numbers/ranges (for example `1,2,4-7`), or an exact section name.
 
 Available operations:
 
