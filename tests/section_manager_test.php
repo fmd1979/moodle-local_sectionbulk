@@ -96,6 +96,67 @@ final class section_manager_test extends \advanced_testcase {
         $this->assertSame($timestamp, (int)$tree->c[0]->t);
     }
 
+    public function test_multiple_section_numbers_target_only_requested_sections(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['numsections' => 4]);
+        $timestamp = 1900000000;
+
+        $data = (object)[
+            'scope' => 'course',
+            'courseids' => (string)$course->id,
+            'operation' => 'date_from_set',
+            'sectionmode' => 'numbers',
+            'sectionnumbers' => '1,3-4',
+            'allmatches' => 0,
+            'fromdate' => $timestamp,
+            'showcondition' => 1,
+        ];
+
+        $manager = new section_manager();
+        $result = $manager->process($data, true);
+        $this->assertSame(3, $result['changes']);
+
+        foreach ([1, 3, 4] as $number) {
+            $section = $DB->get_record('course_sections',
+                ['course' => $course->id, 'section' => $number], '*', MUST_EXIST);
+            $this->assertNotEmpty($section->availability);
+        }
+
+        $section2 = $DB->get_record('course_sections',
+            ['course' => $course->id, 'section' => 2], '*', MUST_EXIST);
+        $this->assertEmpty($section2->availability);
+    }
+
+    public function test_all_sections_excludes_general_section_zero(): void {
+        global $DB;
+        $this->resetAfterTest(true);
+        $this->setAdminUser();
+
+        $course = $this->getDataGenerator()->create_course(['numsections' => 3]);
+        $timestamp = 1900000000;
+
+        $data = (object)[
+            'scope' => 'course',
+            'courseids' => (string)$course->id,
+            'operation' => 'date_from_set',
+            'sectionmode' => 'all',
+            'allmatches' => 0,
+            'fromdate' => $timestamp,
+            'showcondition' => 1,
+        ];
+
+        $manager = new section_manager();
+        $result = $manager->process($data, true);
+        $this->assertSame(3, $result['changes']);
+
+        $general = $DB->get_record('course_sections',
+            ['course' => $course->id, 'section' => 0], '*', MUST_EXIST);
+        $this->assertEmpty($general->availability);
+    }
+
     public function test_quiz_highest_grade_for_multiple_attempts(): void {
         global $DB;
         $this->resetAfterTest(true);
