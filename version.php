@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_sectionbulk';
-$plugin->version = 2026092901;
+$plugin->version = 2026093001;
 $plugin->requires = 2023100900; // Moodle 4.3.
 $plugin->supported = [403, 502];
 $plugin->maturity = MATURITY_RC;
-$plugin->release = '1.2.0';
+$plugin->release = '1.2.1';
