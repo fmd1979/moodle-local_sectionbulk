@@ -89,7 +89,9 @@ class bulk_form extends \moodleform {
         $mform->addElement('header', 'sectionhdr', get_string('sectiontarget', 'local_sectionbulk'));
         $mform->hideIf('sectionhdr', 'operation', 'in', array_merge($quizoperations, ['section_create']));
         $mform->addElement('select', 'sectionmode', get_string('sectionmode', 'local_sectionbulk'), [
+            'all' => get_string('sectionmode_all', 'local_sectionbulk'),
             'number' => get_string('sectionmode_number', 'local_sectionbulk'),
+            'numbers' => get_string('sectionmode_numbers', 'local_sectionbulk'),
             'name' => get_string('sectionmode_name', 'local_sectionbulk'),
         ]);
         $mform->setDefault('sectionmode', 'number');
@@ -100,6 +102,12 @@ class bulk_form extends \moodleform {
         $mform->setDefault('sectionnumber', 1);
         $mform->hideIf('sectionnumber', 'sectionmode', 'neq', 'number');
         $mform->hideIf('sectionnumber', 'operation', 'in', array_merge($quizoperations, ['section_create']));
+
+        $mform->addElement('text', 'sectionnumbers', get_string('sectionnumbers', 'local_sectionbulk'));
+        $mform->setType('sectionnumbers', PARAM_RAW_TRIMMED);
+        $mform->addHelpButton('sectionnumbers', 'sectionnumbers', 'local_sectionbulk');
+        $mform->hideIf('sectionnumbers', 'sectionmode', 'neq', 'numbers');
+        $mform->hideIf('sectionnumbers', 'operation', 'in', array_merge($quizoperations, ['section_create']));
 
         $mform->addElement('text', 'sectionname', get_string('sectionname', 'local_sectionbulk'));
         $mform->setType('sectionname', PARAM_TEXT);
@@ -253,6 +261,22 @@ class bulk_form extends \moodleform {
         if (!$isquiz && $operation !== 'section_create') {
             if ($data['sectionmode'] === 'number' && (!isset($data['sectionnumber']) || (int)$data['sectionnumber'] < 0)) {
                 $errors['sectionnumber'] = get_string('validation_sectionnumber', 'local_sectionbulk');
+            }
+            if ($data['sectionmode'] === 'numbers') {
+                $rawsections = trim((string)($data['sectionnumbers'] ?? ''));
+                if ($rawsections === '' || !preg_match('/^\s*\d+(?:\s*-\s*\d+)?(?:\s*,\s*\d+(?:\s*-\s*\d+)?)*\s*$/', $rawsections)) {
+                    $errors['sectionnumbers'] = get_string('validation_sectionnumbers', 'local_sectionbulk');
+                } else {
+                    foreach (preg_split('/\s*,\s*/', $rawsections) as $part) {
+                        if (str_contains($part, '-')) {
+                            [$start, $end] = array_map('intval', preg_split('/\s*-\s*/', $part));
+                            if ($start > $end) {
+                                $errors['sectionnumbers'] = get_string('validation_sectionnumbers', 'local_sectionbulk');
+                                break;
+                            }
+                        }
+                    }
+                }
             }
             if ($data['sectionmode'] === 'name' && trim((string)$data['sectionname']) === '') {
                 $errors['sectionname'] = get_string('validation_sectionname', 'local_sectionbulk');
